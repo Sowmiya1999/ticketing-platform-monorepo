@@ -1,5 +1,8 @@
 import { Client } from "pg";
 import { execSync } from "child_process";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const main = async () => {
   const dbUrl = process.env.DATABASE_URL || "";
