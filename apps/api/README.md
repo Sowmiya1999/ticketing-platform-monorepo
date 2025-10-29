@@ -1,50 +1,80 @@
-# API Application
+Ticketing Platform Monorepo
 
-## Setup Instructions
+A sophisticated event management and ticketing system built with NestJS, PostgreSQL, and Drizzle ORM.
+It features intelligent dynamic pricing algorithms, real-time availability tracking, and robust concurrency handling to prevent overbooking.
 
-1. **Choose your backend framework:**
-   - NestJS (preferred for this assignment)
-   - Express.js
-   - Fastify
 
-2. **Install dependencies:**
 
-   For NestJS:
+Tech Stack
 
-```bash
-   pnpm add @nestjs/common @nestjs/core @nestjs/platform-express reflect-metadata rxjs
-   pnpm add -D @nestjs/cli @nestjs/schematics @nestjs/testing
-```
+Backend: NestJS (TypeScript)
 
-For Express:
+Database: PostgreSQL
 
-```bash
-   pnpm add express cors dotenv
-   pnpm add -D @types/express @types/cors @types/node
-```
+ORM: Drizzle ORM
 
-3. **Update package.json scripts** based on your chosen framework
+Cache (optional): Redis (Upstash)
 
-4. **Configure environment variables:**
-   - Copy `.env.example` to `.env`
-   - Update with your database credentials
+Testing: Jest
 
-## Development
+Runtime: Node.js v22.17.0
 
-```bash
-pnpm dev
-```
 
-## Build
 
-```bash
-pnpm build
-```
+Before running the project, ensure you have:
 
-## Required Environment Variables
+Node.js: v22.17.0 or higher
 
-```
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-PORT=3001
-NODE_ENV=development
-```
+PostgreSQL: running locally at localhost:5432
+
+npm: v10+
+
+
+
+Installation (Under 5 Commands)
+
+# 1. Clone the repository
+git clone <github url>
+cd ticketing-platform-monorepo
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up database
+ npm run db:setup
+
+# 4. Seed initial data
+npm run seed
+
+# 5. Start the development server
+npm run dev
+
+
+
+Running Tests
+# Run all tests
+npm run test
+
+# Watch mode (live test updates)
+npm run test:watch
+
+# Run with coverage report
+npm run test:cov
+
+environment variable documentation
+DATABASE_URL=            # PostgreSQL connection string
+PORT=                    # Port number for the backend server
+NODE_ENV=                # Environment type (development | production | test)
+
+THRESHOLD_TIME_FOR_DEMANDS=  # Time (in hours) for evaluating demand fluctuations
+
+TIME_WEIGHT=                 # Weight for time-based influence in pricing
+DEMAND_WEIGHT=               # Weight for demand-based influence
+INVENTORY_WEIGHT=            # Weight for inventory-based influence
+
+TIME_RULES=                  # JSON array defining time-based pricing rules
+DEMAND_RULES=                # JSON array defining demand-based pricing rules
+INVENTORY_RULES=             # JSON array defining inventory-based pricing rules
+
+ADMIN_API_KEY=               # Secret key for admin API access
+

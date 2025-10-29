@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsString, IsDate, IsNumber, IsJSON, IsOptional } from 'class-validator';
+import { IsString, IsDate, IsNumber, IsJSON, IsOptional, IsBoolean } from 'class-validator';
 
 
 export class EventDTO {
@@ -30,5 +30,8 @@ export class EventDTO {
 
   @IsOptional()
   @IsJSON()
-  pricingRules?: Record<string, any>;
+  pricingRules?: Record<string, any> = {};
+
+  @IsBoolean()
+  isDefaultPricingRulesEnabled:boolean = true;
 }

@@ -14,3 +14,12 @@ export function mergePricingRules<PricingRules>(defaultPricingRules: PricingRule
   }
   return output;
 }
+
+export function convertJson(pricingRules:any){
+ 
+    const rules = typeof pricingRules === 'string'
+      ? JSON.parse(pricingRules)
+      : pricingRules || {};
+    return rules;
+ 
+}

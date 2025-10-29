@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# 🎨 Ticketing Platform Frontend
 
-## Getting Started
+The **frontend** of the Ticketing Platform — a dynamic event booking system that displays real-time pricing updates, event listings, and booking flows.  
+Built with **Next.js 15**, **TypeScript**, and **Tailwind CSS** for speed, scalability, and developer efficiency.
 
-First, run the development server:
+---
+
+## ⚙️ Prerequisites
+
+Make sure you have the following installed:
+
+- **Node.js** ≥ 18.0.0  
+- **npm** ≥ 9.0.0 (or **yarn/pnpm** equivalent)  
+- Backend service running locally at `http://localhost:3001`
+
+---
+
+## 🛠️ Installation Steps
+
+You can set up and run the project in under 5 commands:
 
 ```bash
+# 1. Clone the repository
+git clone <github url>
+
+# 2. Navigate to the frontend directory
+cd web
+
+# 3. Install dependencies
+npm install
+
+# 4. Create a .env
+cp .env.example .env
+
+# 5. Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Environment Variables Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+NEXT_PUBLIC_API_BASE_URL=      # Base URL for backend API (e.g., http://localhost:3001)
+NEXT_PUBLIC_ADMIN_API_KEY=     # Admin API key for admin-level operations
+NEXT_PUBLIC_BOOKING_TIMER=     # Timer duration (in seconds) for booking confirmation
+NEXT_PUBLIC_MIN_CEILING_WEIGHT # Provided ceiling price should be greater than the base * provided_factor
+NEXT_PUBLIC_MIN_FLOOR_WEIGHT # Provided floor price should be less than the base * provided_factor

@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.card-outline{
+    @apply rounded-lg p-[1px] bg-gradient-to-r from-blue-600 to-orange-400
+}
+
+.title{
+    @apply text-2xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-orange-400 bg-clip-text text-transparent
+}

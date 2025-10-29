@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { Event } from "../database/schema";
 import { EventsService } from "./events.service";
 import { EventDTO } from "./dto/createEvent.dto";
+import { PricingEngineService } from "../pricingEngine/pricingEngine.service";
+import { PriceBreakdown } from "../bookings/type/priceBreakdown.type";
 
 /**
 - `GET /events` - List all events with current price and availability
@@ -13,12 +15,16 @@ import { EventDTO } from "./dto/createEvent.dto";
 
 @Controller("events")
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly pricingEngineService: PricingEngineService
+
+  ) {
      console.log('EventsService injected:', eventsService);
   }
 
   /**
-   * API to get all the events data
+   * API to get allpricingEngine data
    */
   @Get()
   async getAllEvents(): Promise<Event[]> {
@@ -46,4 +52,13 @@ export class EventsController {
   async createEvent(@Body() eventData: EventDTO): Promise<Event | null> {
     return this.eventsService.createNewEvent(eventData);
   }
+
+@Post(':id/price-breakdown')
+async getEventPriceBreakDown(
+  @Param('id') id: number,
+  @Body() body: { quantity: number; priceBreakDown: PriceBreakdown }
+) {
+  return this.eventsService.calculatePriceBreakDown(id, body.quantity, body.priceBreakDown);
+}
+   
 }

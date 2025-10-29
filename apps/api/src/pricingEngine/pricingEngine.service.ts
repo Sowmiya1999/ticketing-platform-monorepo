@@ -1,9 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import {  Injectable } from "@nestjs/common";
 import { Event } from "../database/schema";
 import { EventsRepository } from "../repositories/event.repository";
-import { PricingRules } from "./type/pricingRules.type";
-import { mergePricingRules } from "../lib/helper/helper";
-import { defaultPricingRules } from "./common/constants";
+import { convertJson } from "../lib/helper/helper";
 import { differenceInDays } from "date-fns";
 import { BookingsRepository } from "../repositories/booking.repository";
 
@@ -26,13 +24,10 @@ export class PricingEngineService {
         floorPrice,
         ceilingPrice,
         pricingRules,
-        isDefaultPricingRulesEnabled,
+        currentPrice
       }: Partial<Event> = event;
 
-      const rules = this.getFinalRules(
-        isDefaultPricingRulesEnabled ?? true,
-        pricingRules as any
-      );
+      const rules: any = convertJson(pricingRules);
 
       const daysLeftForEvent = Math.max(0, differenceInDays(date, new Date()));
 
@@ -48,56 +43,69 @@ export class PricingEngineService {
       // Time based rule
       const timeAdjustment = this.getTimeAdjustment(
         daysLeftForEvent,
-        rules.timeRules
+        rules.timeRules!
       );
 
       // Inventory based rule
       const inventoryAdjustment = this.getInventoryAdjustment(
         remainingTicketsRatio,
-        rules.inventoryRules
+        rules.inventoryRules!
       );
 
       // Demand Based rule
       const demandAdjustment = this.getDemandAdjustment(
         recentBookings,
-        rules.demandRules
+        rules.demandRules!
       );
 
-      const totalAdjustment =
-        timeAdjustment * rules.weights.time +
-        demandAdjustment * rules.weights.demand +
-        inventoryAdjustment * rules.weights.inventory;
+      const priceAdjustment = this.getTotalAdjustment(
+        basePrice,
+        rules,
+        timeAdjustment,
+        demandAdjustment,
+        inventoryAdjustment
+      );
 
-      let newPrice = basePrice * (1 + totalAdjustment);
+     
+      let newPrice = basePrice * (1 + priceAdjustment.totalAdjustment);
 
       newPrice = Math.max(floorPrice, Math.min(ceilingPrice, newPrice));
-      
+
       if (newPrice !== event.currentPrice) {
-        await this.eventsRepository.updatePrice(id, newPrice);
+        await this.eventsRepository.updatePriceBreakDown(id, newPrice, priceAdjustment)
       }
     }
   }
 
-  private getFinalRules(
-    isDefaultPricingRulesEnabled: boolean,
-    customerRules?: Partial<PricingRules>
-  ): PricingRules {
-    // condition to priortize the customer preference over default
-    //  and to check whether to include default pricing rules.
-    if (!isDefaultPricingRulesEnabled) {
-      return mergePricingRules(
-        {
-          weights: { time: 0, demand: 0, inventory: 0 },
-          timeRules: [],
-          demandRules: [],
-          inventoryRules: [],
-        },
-        customerRules ?? {}
-      );
-    }
+  private getTotalAdjustment(
+  basePrice: number,
+  rules: any,
+  timeAdjustment: number,
+  demandAdjustment: number,
+  inventoryAdjustment: number
+) {
+  const timePercent = timeAdjustment * rules.weights!.time;
+  const demandPercent = demandAdjustment * rules.weights!.demand;
+  const inventoryPercent = inventoryAdjustment * rules.weights!.inventory;
 
-    return mergePricingRules(defaultPricingRules, customerRules ?? {});
-  }
+  let totalAdjustment = timePercent + demandPercent + inventoryPercent;
+
+
+  const timeAmount = basePrice * timePercent;
+  const demandAmount = basePrice * demandPercent;
+  const inventoryAmount = basePrice * inventoryPercent;
+
+  return {
+    basePrice,
+    timePercent,
+    timeAmount,
+    demandPercent,
+    demandAmount,
+    inventoryPercent,
+    inventoryAmount,
+    totalAdjustment,
+  };
+}
 
   private getTimeAdjustment(
     daysBefore: number,
@@ -112,22 +120,22 @@ export class PricingEngineService {
 
   private getDemandAdjustment(
     recentBookings: number,
-    demandRules: { threshold: number; boost: number }[]
+    demandRules: { threshold: number; weight: number }[]
   ): number {
     const rule = demandRules
       .sort((a, b) => b.threshold - a.threshold)
       .find((r) => recentBookings >= r.threshold);
 
-    return rule ? rule.boost : 0;
+    return rule ? rule.weight : 0;
   }
   private getInventoryAdjustment(
     inventoryLeftRatio: number,
-    inventoryRules: { threshold: number; boost: number }[]
+    inventoryRules: { threshold: number; weight: number }[]
   ): number {
     const rule = inventoryRules
       .sort((a, b) => a.threshold - b.threshold)
       .find((r) => inventoryLeftRatio <= r.threshold);
 
-    return rule ? rule.boost : 0;
+    return rule ? rule.weight : 0;
   }
 }

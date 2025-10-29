@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Event } from "../database/schema";
 import { db } from "../database";
-import { events, bookings } from "../database/schema";
+import { events } from "../database/schema";
 import { Status } from "../lib/common/enum";
 import { eq, ne, desc, inArray } from "drizzle-orm";
 import { EventDTO } from "../events/dto/createEvent.dto";
@@ -35,8 +35,8 @@ export class EventsRepository {
 
   }
 
-  async updatePrice(eventId:number, newPrice:number):Promise<void>{
-     await db.update(events).set({currentPrice:newPrice}).where(eq(events.id,eventId));
+  async updatePriceBreakDown(eventId:number, newPrice:number, priceBreakDown:any):Promise<void>{
+     await db.update(events).set({currentPrice:newPrice, priceBreakDown: priceBreakDown}).where(eq(events.id,eventId));
      return;
   }
 
@@ -51,6 +51,7 @@ export class EventsRepository {
       floorPrice,
       ceilingPrice,
       pricingRules,
+      isDefaultPricingRulesEnabled
     } = eventData;
     await db
       .insert(events)
@@ -65,10 +66,12 @@ export class EventsRepository {
         ceilingPrice: ceilingPrice,
         floorPrice:floorPrice,
         pricingRules: pricingRules ?? {},
-        status: "ACTIVE",
+        isDefaultPricingRulesEnabled
       })
       .returning();
 
     return {} as Event;
+
   }
+
 }
