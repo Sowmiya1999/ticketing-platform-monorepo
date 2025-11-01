@@ -27,7 +27,7 @@ git clone <github url>
 cd web
 
 # 3. Install dependencies
-npm install
+pnpm install
 
 # 4. Create a .env
 cp .env.web.example .env
