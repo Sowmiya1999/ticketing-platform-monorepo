@@ -1,9 +1,7 @@
 Ticketing Platform Monorepo
 
-A sophisticated event management and ticketing system built with NestJS, PostgreSQL, and Drizzle ORM.
-It features intelligent dynamic pricing algorithms, real-time availability tracking, and robust concurrency handling to prevent overbooking.
-
-
+A  event management and ticketing system built with NestJS, PostgreSQL, and Drizzle ORM.
+It features  dynamic pricing algorithms, real-time availability tracking, and robust concurrency handling to prevent overbooking.
 
 Tech Stack
 
@@ -41,7 +39,7 @@ cd ticketing-platform-monorepo
 npm install
 
 # 3. Set up database
- npm run db:setup
+npm run db:setup
 
 # 4. Seed initial data
 npm run seed

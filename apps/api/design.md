@@ -1,6 +1,6 @@
-# 🧩 DESIGN.md
+#  DESIGN.md
 
-## 🧠 Dynamic Pricing Algorithm
+##  Dynamic Pricing Algorithm
 
 The **dynamic pricing system** automatically adjusts event ticket prices in real-time based on **demand, inventory, and time** until the event.  
 
@@ -28,7 +28,7 @@ This ensures the system remains responsive to demand fluctuations without manual
 
 ---
 
-## 🔒 Concurrency Management
+##  Concurrency Management
 
 Handling concurrency was a crucial design concern to **prevent overbooking** when multiple users attempt to reserve tickets simultaneously.
 
@@ -45,7 +45,7 @@ This guarantees **data consistency and integrity** while preserving scalability 
 
 ---
 
-## 🧱 Monorepo Architecture
+##  Monorepo Architecture
 
 The project is structured as a **monorepo** that contains both frontend and backend under a single workspace.  
 This design simplifies development and ensures smooth communication between components.
@@ -54,12 +54,11 @@ This design simplifies development and ensures smooth communication between comp
 - **Shared types and configurations** across all packages (via TypeScript).  
 - **Simplified environment setup** — run both services with minimal commands.  
 
-## ⚖️ Design Trade-offs
+##  Design Trade-offs
 
 Several trade-offs were made to balance functionality and delivery speed:
 
 - Postponed the **user-friendly rule interface** in favor of the toggle-based configuration.  
-- Deferred **seat selection, hall mapping, and pathfinding features** for later development.  
 - Focused primarily on **accuracy, reliability, and concurrency safety** in this phase.  
 - Skipped complex **real-time analytics** to meet the initial milestone deadlines.
 
@@ -67,19 +66,20 @@ These choices ensured a stable, production-ready core while leaving room for sca
 
 ---
 
-## 🚀 Future Improvements
+##  Future Improvements
 
 With more time, the following enhancements are planned:
 
-### 🧮 Pricing Intelligence
+###  Pricing Intelligence
 - Add analytics to **recommend ideal pricing** for new events using historical booking data.
 
-### 🕓 Automated Maintenance
+###  Automated Maintenance
 - Implement a **cron job** to automatically mark past events as inactive and disable new bookings.
 
-### 🪟 User Experience
+###  User Experience
 - Introduce **seat map selection** and **hall route guidance** for attendees.  
 - Provide a **friendly pricing interface** using intuitive labels like *Low*, *Medium*, *High*.
 
-### 📊 Insights and Reporting
+###  Insights and Reporting
 - Build an **analytics dashboard** to visualize user engagement, sales performance, and pricing trends.
+
