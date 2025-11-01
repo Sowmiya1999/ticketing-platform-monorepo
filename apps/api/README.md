@@ -26,20 +26,21 @@ Node.js: v22.17.0 or higher
 PostgreSQL: running locally at localhost:5432
 
 npm: v10+
-
+pnpm: v8+
 
 
 Installation (Under 5 Commands)
 
 # 1. Clone the repository
 git clone <github url>
-cd ticketing-platform-monorepo
+cd .\apps\api
 
 # 2. Install dependencies
-npm install
+pnpm install
+cp .env.example .env
 
 # 3. Set up database
-npm run db:setup
+npm run db:setup // db will get created automatically
 
 # 4. Seed initial data
 npm run seed

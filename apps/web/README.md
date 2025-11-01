@@ -30,7 +30,7 @@ cd web
 npm install
 
 # 4. Create a .env
-cp .env.example .env
+cp .env.web.example .env
 
 # 5. Run the development server
 npm run dev
