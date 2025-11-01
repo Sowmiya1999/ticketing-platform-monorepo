@@ -35,6 +35,7 @@ cp .env.web.example .env
 # 5. Run the development server
 npm run dev
 
+demovideos.zip # contains the demo of the ticket booking project
 
 Environment Variables Documentation
 
