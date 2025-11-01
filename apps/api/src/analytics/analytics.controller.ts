@@ -1,17 +1,24 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Logger, Param } from "@nestjs/common";
 import { AnalyticsService } from "./analytics.service";
 
 @Controller("analytics")
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(
+    private readonly analyticsService: AnalyticsService,
+    private readonly logger:Logger
+  ) {}
 
-  @Get("events/:id")
-  async getEventAnalytics(@Param("id") eventId: string) {
-    return this.analyticsService.getEventAnalytics(+eventId);
-  }
-
-  @Get("summary")
+    @Get("/summary")
   async getSummaryAnalytics() {
-    return this.analyticsService.getSummaryAnalytics();
+    this.logger.log("Entered AnalyticsController.getSummaryAnalytics called");
+    return await this.analyticsService.getSummaryAnalytics();
   }
+
+  @Get(":id")
+  async getEventAnalytics(@Param("id") eventId: number) {
+    this.logger.log("Entered AnalyticsController.getEventAnalytics called");
+    return await this.analyticsService.getEventAnalytics(eventId);
+  }
+
+
 }

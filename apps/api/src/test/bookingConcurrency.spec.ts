@@ -1,7 +1,7 @@
-import { db } from '../../src/database';
-import { BookingsRepository } from '../../src/repositories/booking.repository';
-import { events, bookings } from '../../src/database/schema';
-import { BookingDTO } from '../../src/bookings/dto/createBooking.dto';
+import { db } from '../database';
+import { BookingsRepository } from '../repositories/booking.repository';
+import { events, bookings } from '../database/schema';
+import { BookingDTO } from '../bookings/dto/createBooking.dto';
 import { PriceBreakdown } from '../bookings/type/priceBreakdown.type';
 import { eq } from 'drizzle-orm';
 describe('BookingsRepository - Concurrency Handling', () => {

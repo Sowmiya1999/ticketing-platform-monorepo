@@ -4,12 +4,15 @@ import { Booking, bookings, events } from "../database/schema";
 import { db } from "../database";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { Status } from "../lib/common/enum";
+import { BookingWithEvent } from "./types/bookingWithEvent.type";
+import { PriceBreakdown } from "../bookings/type/priceBreakdown.type";
 
 @Injectable()
 export class BookingsRepository {
   constructor() {}
 
   async getBookingByEventId(eventId: number): Promise<Booking[]> {
+    
     return await db
       .select()
       .from(bookings)
@@ -81,7 +84,7 @@ export class BookingsRepository {
     return countResult.length > 0 ? Number(countResult[0]?.count) : 0;
   }
 
-  async  findBookingByEmail(email: string) {
+  async  findBookingByEmail(email: string):Promise<BookingWithEvent[]> {
   const results = await db
     .select({
       bookingId: bookings.id,
@@ -102,6 +105,11 @@ export class BookingsRepository {
     .innerJoin(events, eq(bookings.eventId, events.id))
     .where(and(eq(bookings.userEmail, email), ne(bookings.status, Status.DELETED)));
 
-    return results;
+    return results.map(r => ({
+    ...r,
+    priceBreakdown: r.priceBreakdown as PriceBreakdown,
+    createdAt: r.createdAt ?? new Date(),
+    eventDate: new Date(r.eventDate)
+  }));
 }
 }

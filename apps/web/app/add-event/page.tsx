@@ -4,8 +4,20 @@ import { useState } from "react";
 import { createEvent } from "../../lib/api";
 import toast from "react-hot-toast";
 
+interface FormData {
+  name: string;
+  venue: string;
+  date: string;
+  description: string;
+  totalTickets: string;
+  basePrice: string;
+  floorPrice: string;
+  ceilingPrice: string;
+  isDefaultPricingRulesEnabled: boolean;
+}
+
 export default function CreateEventPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     venue: "",
     date: "",
@@ -19,29 +31,26 @@ export default function CreateEventPage() {
 
   const [loading, setLoading] = useState(false);
 
-  function handleChange(
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
+  ) => {
     const { name, value } = e.target;
 
-    // Allow only digits and one dot for numeric fields
-    if (
-      ["basePrice", "floorPrice", "ceilingPrice", "totalTickets"].includes(name)
-    ) {
+    if (["basePrice", "floorPrice", "ceilingPrice", "totalTickets"].includes(name)) {
       if (!/^\d*\.?\d*$/.test(value)) return;
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
-  }
+  };
 
-  function handleToggle() {
+  const handleToggle = () => {
     setFormData((prev) => ({
       ...prev,
       isDefaultPricingRulesEnabled: !prev.isDefaultPricingRulesEnabled,
     }));
-  }
+  };
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -51,23 +60,26 @@ export default function CreateEventPage() {
 
     if (ceiling < base || floor > base) {
       alert(
-        "Invalid pricing: Ceiling Price must be LOWER than Base Price, and Floor Price must be HIGHER than Base Price."
+        "Invalid pricing: Floor Price must be LOWER than Base Price, and Ceiling Price must be HIGHER than Base Price."
       );
       setLoading(false);
       return;
     }
 
-    if (
-      ceiling < base * Number(process.env.NEXT_PUBLIC_MIN_CEILING_WEIGHT) ||
-      floor > base * Number(process.env.NEXT_PUBLIC_MIN_FLOOR_WEIGHT)
-    ) {
-      alert(
-        `Invalid pricing: Ceiling must be at least ${
-          base * Number(process.env.NEXT_PUBLIC_MIN_CEILING_WEIGHT)
-        }, and Floor must be at most ${
-          base * Number(process.env.NEXT_PUBLIC_MIN_FLOOR_WEIGHT)
-        }.`
-      );
+    const minFloorPrice = Number(process.env.NEXT_PUBLIC_MIN_FLOOR_WEIGHT) * base;
+    const maxFloorPrice = Number(process.env.NEXT_PUBLIC_MAX_FLOOR_WEIGHT) * base;
+    const minCeilingPrice = Number(process.env.NEXT_PUBLIC_MIN_CEILING_WEIGHT) * base;
+    const maxCeilingPrice = Number(process.env.NEXT_PUBLIC_MAX_CEILING_WEIGHT) * base;
+
+    if (floor < minFloorPrice || floor > maxFloorPrice) {
+      alert(`Invalid floor value must be between ${minFloorPrice} and ${maxFloorPrice}.`);
+      setLoading(false);
+      return;
+    }
+
+    if (ceiling < minCeilingPrice || ceiling > maxCeilingPrice) {
+      alert(`Invalid ceiling value must be between ${minCeilingPrice} and ${maxCeilingPrice}.`);
+      setLoading(false);
       return;
     }
 
@@ -97,9 +109,20 @@ export default function CreateEventPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const today = new Date().toISOString().slice(0, 16);
+
+  const fields = [
+    { label: "Event Name", name: "name", type: "text", placeholder: "Enter event name" },
+    { label: "Venue", name: "venue", type: "text", placeholder: "Enter venue" },
+    { label: "Date", name: "date", type: "datetime-local", placeholder: "Select event date" },
+    { label: "Description", name: "description", type: "textarea", placeholder: "Enter event description" },
+    { label: "Total Tickets", name: "totalTickets", type: "text", placeholder: "Total tickets available" },
+    { label: "Base Price", name: "basePrice", type: "text", placeholder: "Enter base price" },
+    { label: "Floor Price", name: "floorPrice", type: "text", placeholder: "Enter higher floor price" },
+    { label: "Ceiling Price", name: "ceilingPrice", type: "text", placeholder: "Enter lower ceiling price" },
+  ];
 
   return (
     <div className="min-h-screen bg-black flex justify-center items-center px-4">
@@ -109,98 +132,30 @@ export default function CreateEventPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            {
-              label: "Event Name",
-              name: "name",
-              type: "text",
-              placeholder: "Enter event name",
-            },
-            {
-              label: "Venue",
-              name: "venue",
-              type: "text",
-              placeholder: "Enter venue",
-            },
-            {
-              label: "Date",
-              name: "date",
-              type: "datetime-local",
-              placeholder: "Select event date",
-            },
-            {
-              label: "Description",
-              name: "description",
-              type: "textarea",
-              placeholder: "Enter event description",
-            },
-            {
-              label: "Total Tickets",
-              name: "totalTickets",
-              type: "text",
-              placeholder: "Total tickets available",
-            },
-            {
-              label: "Base Price",
-              name: "basePrice",
-              type: "text",
-              placeholder: "Enter base price",
-            },
-            {
-              label: "Floor Price",
-              name: "floorPrice",
-              type: "text",
-              placeholder: "Enter higher floor price",
-            },
-            {
-              label: "Ceiling Price",
-              name: "ceilingPrice",
-              type: "text",
-              placeholder: "Enter lower ceiling price",
-            },
-          ].map((field) => (
+          {fields.map((field) => (
             <div key={field.name}>
-              <label className="block text-sm font-medium text-gray-800 mb-1">
-                {field.label}
-              </label>
+              <label className="block text-sm font-medium text-gray-800 mb-1">{field.label}</label>
               {field.type === "textarea" ? (
                 <textarea
                   name={field.name}
-                  value={
-                    formData[field.name as keyof typeof formData] as string
-                  }
+                  value={formData[field.name as keyof typeof formData] as string}
                   onChange={handleChange}
                   placeholder={field.placeholder}
-                  className="w-full p-3 bg-gray-100 text-black rounded-md 
-                    focus:outline-none focus:ring-2 focus:ring-transparent 
-                    [background:linear-gradient(#f3f4f6,#f3f4f6)_padding-box,linear-gradient(to_right,#2563eb,#fb923c)_border-box] 
-                    border-[2px] placeholder-gray-500"
+                  className="w-full p-3 bg-gray-100 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-transparent border-[2px] placeholder-gray-500"
                   rows={3}
                 />
               ) : (
                 <input
                   type={field.type}
                   name={field.name}
-                  inputMode={
-                    [
-                      "basePrice",
-                      "floorPrice",
-                      "ceilingPrice",
-                      "totalTickets",
-                    ].includes(field.name)
-                      ? "decimal"
-                      : "text"
-                  }
-                  value={
+                  inputMode={["basePrice", "floorPrice", "ceilingPrice", "totalTickets"].includes(field.name) ? "decimal" : "text"}
+                   value={
                     formData[field.name as keyof typeof formData] as string
                   }
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   {...(field.name === "date" ? { min: today } : {})}
-                  className="w-full p-3 bg-gray-100 text-black rounded-md 
-                    focus:outline-none focus:ring-2 focus:ring-transparent 
-                    [background:linear-gradient(#f3f4f6,#f3f4f6)_padding-box,linear-gradient(to_right,#2563eb,#fb923c)_border-box] 
-                    border-[2px] placeholder-gray-500"
+                  className="w-full p-3 bg-gray-100 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-transparent border-[2px] placeholder-gray-500"
                   required
                 />
               )}
@@ -208,22 +163,18 @@ export default function CreateEventPage() {
           ))}
 
           <div className="flex items-center justify-between mt-4">
-            <span className="text-sm font-medium text-gray-800">
-              Enable Default Pricing Rules
-            </span>
+            <span className="text-sm font-medium text-gray-800">Enable Default Pricing Rules</span>
             <button
               type="button"
               onClick={handleToggle}
-              className={`relative inline-flex h-6 w-12 items-center rounded-full transition 
-                ${
-                  formData.isDefaultPricingRulesEnabled
-                    ? "bg-gradient-to-r from-blue-600 to-orange-400"
-                    : "bg-gray-400"
-                }`}
+              className={`relative inline-flex h-6 w-12 items-center rounded-full transition ${
+                formData.isDefaultPricingRulesEnabled ? "bg-gradient-to-r from-blue-600 to-orange-400" : "bg-gray-400"
+              }`}
             >
               <span
-                className={`inline-block h-5 w-5 transform bg-white rounded-full transition 
-                  ${formData.isDefaultPricingRulesEnabled ? "translate-x-6" : "translate-x-1"}`}
+                className={`inline-block h-5 w-5 transform bg-white rounded-full transition ${
+                  formData.isDefaultPricingRulesEnabled ? "translate-x-6" : "translate-x-1"
+                }`}
               />
             </button>
           </div>

@@ -5,24 +5,51 @@ import { useRouter } from 'next/navigation';
 import PriceBreakdown from './PriceBreakDown';
 import { createBooking, fetchPriceBreakdown } from '../../lib/clientApi';
 
-export default function BookingForm({ event, initialPrice }: any) {
+interface EventType {
+  id: number;
+  basePrice: number;
+  currentPrice: number;
+  totalTickets: number;
+  bookedTickets: number;
+  priceBreakDown: any; // could be typed further based on API
+}
+
+interface BookingFormProps {
+  event: EventType;
+  initialPrice: number;
+}
+
+interface PriceBreakdownData {
+  breakdown: {
+    timeAmount?: number;
+    demandAmount?: number;
+    inventoryAmount?: number;
+  };
+}
+
+export default function BookingForm({ event, initialPrice }: BookingFormProps) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [priceBreakdownData, setPriceBreakdownData] = useState<any>(null);
+  const [priceBreakdownData, setPriceBreakdownData] = useState<PriceBreakdownData | null>(null);
   const [isPriceBreakdownCompleted, setIsPriceBreakdownCompleted] = useState(false);
-
-  const [timeLeft, setTimeLeft] = useState(Number(process.env.NEXT_PUBLIC_BOOKING_TIMER) || 120); 
+  const [timeLeft, setTimeLeft] = useState(Number(process.env.NEXT_PUBLIC_BOOKING_TIMER) || 120);
   const [bookingStarted, setBookingStarted] = useState(false);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
 
 
   useEffect(() => {
     if (bookingStarted) return;
 
     if (timeLeft <= 0) {
-      router.replace('/view-events');
+      router.replace('/events');
+      setTimeout(() => {
+        window.location.replace('/events');
+      }, 50);
       return;
     }
 
@@ -40,12 +67,13 @@ export default function BookingForm({ event, initialPrice }: any) {
       const data = await fetchPriceBreakdown(event.id, quantity, event.priceBreakDown);
       setPriceBreakdownData(data);
       setIsPriceBreakdownCompleted(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to calculate price');
     } finally {
       setLoading(false);
     }
   }
+
 
   async function handleFinalSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,17 +93,16 @@ export default function BookingForm({ event, initialPrice }: any) {
       const bookingId = response?.data?.id;
       if (!bookingId) throw new Error('Booking ID not found in response');
 
-    
       router.replace(`/bookings/success?id=${bookingId}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create booking');
       setBookingStarted(false);
     } finally {
       setLoading(false);
     }
   }
 
- 
+
   useEffect(() => {
     const handlePopState = () => {
       if (bookingStarted || timeLeft <= 0) {
@@ -89,13 +116,13 @@ export default function BookingForm({ event, initialPrice }: any) {
 
   return (
     <div className="relative space-y-6">
-
-        {loading && (
+      {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/20 cursor-not-allowed">
           <div className="w-16 h-16 border-4 border-transparent border-t-blue-600 border-r-orange-400 rounded-full animate-spin"></div>
         </div>
-        )}
- 
+      )}
+
+  
       <form onSubmit={handlePriceCalculationSubmit} className="space-y-4">
         <div>
           <label className="block text-sm">Quantity</label>
@@ -123,7 +150,7 @@ export default function BookingForm({ event, initialPrice }: any) {
 
         <div className="flex items-center justify-between">
           <div>Price (est.)</div>
-          <div className="font-semibold">₹{initialPrice * quantity}</div>
+          <div className="font-semibold">{formatPrice(initialPrice * quantity)}</div>
         </div>
 
         {error && <div className="text-red-600">{error}</div>}
@@ -139,11 +166,9 @@ export default function BookingForm({ event, initialPrice }: any) {
         </div>
       </form>
 
-      {isPriceBreakdownCompleted && (
-        <form
-          onSubmit={handleFinalSubmit}
-          className="bg-white p-4 rounded shadow space-y-3"
-        >
+   
+      {isPriceBreakdownCompleted && priceBreakdownData && (
+        <form onSubmit={handleFinalSubmit} className="bg-white p-4 rounded shadow space-y-3">
           <PriceBreakdown
             eventId={event.id}
             quantity={quantity}

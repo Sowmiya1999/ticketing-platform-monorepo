@@ -1,4 +1,3 @@
-import { PricingRules } from "../../pricingEngine/type/pricingRules.type";
 
 export function mergePricingRules<PricingRules>(defaultPricingRules: PricingRules, customerPricingRules: Partial<PricingRules>): PricingRules {
   const output = { ...defaultPricingRules };

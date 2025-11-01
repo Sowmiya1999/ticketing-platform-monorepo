@@ -1,6 +1,7 @@
 import { Client } from "pg";
 import { execSync } from "child_process";
 import * as dotenv from "dotenv";
+import { existsSync } from "fs";
 
 dotenv.config();
 
@@ -37,6 +38,11 @@ const main = async () => {
   }
 
   await client.end();
+
+  if (!existsSync("drizzle.config.ts")) {
+  console.log("drizzle.config.ts not found. Initializing...");
+  execSync("npm run init", { stdio: "inherit" }); 
+}
 
 
   console.log(" Generating and pushing schema...");

@@ -1,45 +1,65 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { BookingsService } from './bookings.service';
-import { Booking } from '../database/schema';
-import { BookingDTO } from './dto/createBooking.dto';
-import { GenericResponse } from '../lib/response/response';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from "@nestjs/common";
+import { BookingsService } from "./bookings.service";
+import { Booking } from "../database/schema";
+import { BookingDTO } from "./dto/createBooking.dto";
+import { GenericResponse } from "../lib/response/response";
+import { BookingWithEvent } from "../repositories/types/bookingWithEvent.type";
 
+/**
+ * APIs:
+ * - `GET /bookings?eventId=` - Get all bookings for an event
+ * - `GET /bookings/:bookingId` - Get booking details by booking ID
+ * - `POST /bookings` - Create a new booking
+ * - `GET /bookings/by-email/:email` - Get bookings by user email
+ */
 
-
-@Controller('bookings')
+@Controller("bookings")
 export class BookingsController {
+  constructor(
+    private readonly bookingsService: BookingsService,
+    private readonly logger: Logger
+  ) {}
 
-     constructor(private readonly bookingsService: BookingsService) {
-         console.log('BookingsService injected:', bookingsService);
-      }
-    
-      /**
-       * API to get the booking data by event id
-       * @queryParam eventId
-       * @returns booking data for the event
-       */
-      @Get()
-      async getBookingByEventId(@Query("eventId") eventId: number): Promise<Booking[]> {
-        return this.bookingsService.getBookingByEventId(Number(eventId));
-      }
-      @Get(":bookingId")
-      async getBookingByBookingId(@Param("bookingId")  bookingId: number): Promise<Booking[]> {
-        return this.bookingsService.getBookingById(Number(bookingId));
-      }
-    
-      /**
-       * API to create a new booking
-       * @param bookingData
-       * @returns
-       */
-    
-      @Post()
-      async createBookings(@Body() bookingData: BookingDTO): Promise<GenericResponse> {
-        return this.bookingsService.createBooking(bookingData);
-      }
 
-      @Get('by-email/:email')
-async getBookingsByEmail(@Param('email') email: string): Promise<Booking[]> {
-  return this.bookingsService.getBookingsByEmail(email);
-}
+  @Get()
+  async getBookingByEventId(
+    @Query("eventId") eventId: number
+  ): Promise<Booking[]> {
+    this.logger.log(`bookingsService.getBookingByEventId called`);
+    return this.bookingsService.getBookingByEventId(Number(eventId));
+  }
+
+
+  @Get(":bookingId")
+  async getBookingByBookingId(
+    @Param("bookingId") bookingId: number
+  ): Promise<Booking[]> {
+    this.logger.log(`bookingsService.getBookingByEventId called`);
+    return this.bookingsService.getBookingById(Number(bookingId));
+  }
+
+
+
+  @Post()
+  async createBooking(
+    @Body() bookingData: BookingDTO
+  ): Promise<GenericResponse> {
+    this.logger.log(`bookingsService.createBooking called`);
+    return this.bookingsService.createBooking(bookingData);
+  }
+
+
+  @Get("by-email/:email")
+  async getBookingsByEmail(@Param("email") email: string): Promise<BookingWithEvent[]> {
+    this.logger.log(`bookingsService.getBookingsByEmail called`);
+    return this.bookingsService.getBookingsByEmail(email);
+  }
 }

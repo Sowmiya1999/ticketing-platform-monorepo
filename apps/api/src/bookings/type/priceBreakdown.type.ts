@@ -1,8 +1,3 @@
-interface BreakdownMap{
-    percentage:number,
-    amount:number
-}
-
 export interface PriceBreakdown{
     
     pricePaid:number,

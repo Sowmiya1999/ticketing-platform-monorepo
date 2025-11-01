@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { PriceSchedulerService } from '../pricingScheduler/pricingSchedulerService';
 import { PricingEngineService } from '../pricingEngine/pricingEngine.service';
 import { EventsRepository } from '../repositories/event.repository';
@@ -6,6 +6,6 @@ import { BookingsRepository } from '../repositories/booking.repository';
 import { EventsService } from '../events/events.service';
 
 @Module({
-    providers: [ PriceSchedulerService,PricingEngineService,EventsRepository,BookingsRepository, EventsService],
+    providers: [ PriceSchedulerService,PricingEngineService,EventsRepository,BookingsRepository, EventsService,Logger],
 })
 export class PricingSchedulerModule {}

@@ -1,16 +1,34 @@
-"use client";
-import React, { useEffect, useState } from "react";
+'use client';
+import React, { useEffect, useState } from 'react';
+
+type PriceBreakdownData = {
+  timeAmount?: number;
+  demandAmount?: number;
+  inventoryAmount?: number;
+};
+
+interface PriceBreakdownProps {
+  eventId: number;
+  quantity: number;
+  basePrice: number;
+  serverCurrentPrice: number;
+  priceBreakdown: PriceBreakdownData;
+}
+
 export default function PriceBreakdown({
   eventId,
   quantity,
-  priceBreakdown,
+  priceBreakdown: initialBreakdown,
   basePrice,
   serverCurrentPrice,
-}: any) {
+}: PriceBreakdownProps) {
   const [currentPrice, setCurrentPrice] = useState<number>(serverCurrentPrice);
-  const [breakdown, setBreakdown] = useState<any>(null);
+  const [breakdown, setBreakdown] = useState<PriceBreakdownData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
 
   useEffect(() => {
     let mounted = true;
@@ -22,9 +40,9 @@ export default function PriceBreakdown({
         if (!mounted) return;
 
         setCurrentPrice(serverCurrentPrice);
-        setBreakdown(priceBreakdown);
-      } catch (err: any) {
-        if (mounted) setError(err.message || "Failed to fetch price breakdown");
+        setBreakdown(initialBreakdown);
+      } catch (err: unknown) {
+        if (mounted) setError(err instanceof Error ? err.message : 'Failed to fetch price breakdown');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -37,19 +55,17 @@ export default function PriceBreakdown({
       mounted = false;
       clearInterval(interval);
     };
-  }, [eventId, quantity, priceBreakdown]);
+  }, [eventId, quantity, serverCurrentPrice, initialBreakdown]);
 
   if (loading && !breakdown) return <div>Loading price breakdown...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
   if (!breakdown) return null;
-  {
-    console.log(breakdown);
-  }
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between">
         <div>Base price</div>
-        <div>₹{(basePrice * quantity)?.toFixed(2) ?? "—"}</div>
+        <div>{formatPrice(basePrice * quantity)}</div>
       </div>
 
       <div className="border-t" />
@@ -58,8 +74,8 @@ export default function PriceBreakdown({
         <div className="flex justify-between text-sm">
           <div>Time-based Adjustment</div>
           <div>
-            {breakdown.timeAmount >= 0 ? "+" : ""}₹
-            {Math.abs(breakdown.timeAmount).toFixed(2)}
+            {breakdown.timeAmount >= 0 ? '+' : ''}
+            {formatPrice(Math.abs(breakdown.timeAmount))}
           </div>
         </div>
       )}
@@ -68,8 +84,8 @@ export default function PriceBreakdown({
         <div className="flex justify-between text-sm">
           <div>Demand-based Adjustment</div>
           <div>
-            {breakdown.demandAmount >= 0 ? "+" : ""}₹
-            {Math.abs(breakdown.demandAmount).toFixed(2)}
+            {breakdown.demandAmount >= 0 ? '+' : ''}
+            {formatPrice(Math.abs(breakdown.demandAmount))}
           </div>
         </div>
       )}
@@ -78,8 +94,8 @@ export default function PriceBreakdown({
         <div className="flex justify-between text-sm">
           <div>Inventory-based Adjustment</div>
           <div>
-            {breakdown.inventoryAmount >= 0 ? "+" : ""}₹
-            {Math.abs(breakdown.inventoryAmount).toFixed(2)}
+            {breakdown.inventoryAmount >= 0 ? '+' : ''}
+            {formatPrice(Math.abs(breakdown.inventoryAmount))}
           </div>
         </div>
       )}
@@ -88,7 +104,7 @@ export default function PriceBreakdown({
 
       <div className="flex justify-between font-semibold">
         <div>Current Price</div>
-        <div>₹{(currentPrice * quantity).toFixed(2)}</div>
+        <div>{formatPrice(currentPrice * quantity)}</div>
       </div>
     </div>
   );

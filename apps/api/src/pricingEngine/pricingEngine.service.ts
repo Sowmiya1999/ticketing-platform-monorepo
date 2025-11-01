@@ -1,4 +1,4 @@
-import {  Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Event } from "../database/schema";
 import { EventsRepository } from "../repositories/event.repository";
 import { convertJson } from "../lib/helper/helper";
@@ -24,7 +24,7 @@ export class PricingEngineService {
         floorPrice,
         ceilingPrice,
         pricingRules,
-        currentPrice
+        currentPrice,
       }: Partial<Event> = event;
 
       const rules: any = convertJson(pricingRules);
@@ -66,46 +66,84 @@ export class PricingEngineService {
         inventoryAdjustment
       );
 
-     
       let newPrice = basePrice * (1 + priceAdjustment.totalAdjustment);
 
-      newPrice = Math.max(floorPrice, Math.min(ceilingPrice, newPrice));
+      // logic that ensures the final price won't exceed the floor or ceiling price
+      const cappedPrice = Math.max(
+        floorPrice,
+        Math.min(ceilingPrice, newPrice)
+      );
+
+      if (cappedPrice !== newPrice) {
+        newPrice = this.recalculateFactorPercentageForCapped(
+          cappedPrice,
+          basePrice,
+          priceAdjustment
+        );
+      }
 
       if (newPrice !== event.currentPrice) {
-        await this.eventsRepository.updatePriceBreakDown(id, newPrice, priceAdjustment)
+        await this.eventsRepository.updatePriceBreakDown(
+          id,
+          newPrice,
+          priceAdjustment
+        );
       }
     }
   }
 
+  private recalculateFactorPercentageForCapped(
+    cappedPrice: number,
+    basePrice: number,
+    priceAdjustment: any
+  ) {
+    const actualAdjustment = (cappedPrice - basePrice) / basePrice;
+    const scale =
+      priceAdjustment.totalAdjustment === 0
+        ? 0
+        : actualAdjustment / priceAdjustment.totalAdjustment;
+
+  priceAdjustment.timePercent = Number((priceAdjustment.timePercent * scale).toFixed(2));
+  priceAdjustment.demandPercent = Number((priceAdjustment.demandPercent * scale).toFixed(2));
+  priceAdjustment.inventoryPercent = Number((priceAdjustment.inventoryPercent * scale).toFixed(2));
+  priceAdjustment.totalAdjustment = Number(actualAdjustment.toFixed(2));
+
+  
+  priceAdjustment.timeAmount = Number((basePrice * priceAdjustment.timePercent).toFixed(2));
+  priceAdjustment.demandAmount = Number((basePrice * priceAdjustment.demandPercent).toFixed(2));
+  priceAdjustment.inventoryAmount = Number((basePrice * priceAdjustment.inventoryPercent).toFixed(2));
+
+  return Number(cappedPrice.toFixed(2));
+  }
+
   private getTotalAdjustment(
-  basePrice: number,
-  rules: any,
-  timeAdjustment: number,
-  demandAdjustment: number,
-  inventoryAdjustment: number
-) {
-  const timePercent = timeAdjustment * rules.weights!.time;
-  const demandPercent = demandAdjustment * rules.weights!.demand;
-  const inventoryPercent = inventoryAdjustment * rules.weights!.inventory;
+    basePrice: number,
+    rules: any,
+    timeAdjustment: number,
+    demandAdjustment: number,
+    inventoryAdjustment: number
+  ) {
+    const timePercent = timeAdjustment * rules.weights!.time;
+    const demandPercent = demandAdjustment * rules.weights!.demand;
+    const inventoryPercent = inventoryAdjustment * rules.weights!.inventory;
 
-  let totalAdjustment = timePercent + demandPercent + inventoryPercent;
+    let totalAdjustment = timePercent + demandPercent + inventoryPercent;
 
+    const timeAmount = basePrice * timePercent;
+    const demandAmount = basePrice * demandPercent;
+    const inventoryAmount = basePrice * inventoryPercent;
 
-  const timeAmount = basePrice * timePercent;
-  const demandAmount = basePrice * demandPercent;
-  const inventoryAmount = basePrice * inventoryPercent;
-
-  return {
-    basePrice,
-    timePercent,
-    timeAmount,
-    demandPercent,
-    demandAmount,
-    inventoryPercent,
-    inventoryAmount,
-    totalAdjustment,
-  };
-}
+    return {
+      basePrice,
+      timePercent,
+      timeAmount,
+      demandPercent,
+      demandAmount,
+      inventoryPercent,
+      inventoryAmount,
+      totalAdjustment,
+    };
+  }
 
   private getTimeAdjustment(
     daysBefore: number,

@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from 'react'
 import { notFound, useRouter } from 'next/navigation'
 import BookingForm from '../../components/BookingForm'
+import { getEventById } from '../../../lib/api'
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
-  
+export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const router = useRouter()
   const [event, setEvent] = useState<any>(null)
   const [timeLeft, setTimeLeft] = useState(Number(process.env.BOOKING_TIMER) || 120) 
@@ -13,17 +14,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     const fetchEvent = async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/events/${params.id}`)
-      if (res.ok) {
-        const data = await res.json()
-        setEvent(data)
+      const res = await getEventById(id)
+       if (res) {
+        setEvent(res)
       } else {
         notFound()
       }
     }
 
     fetchEvent()
-  }, [params.id])
+  }, [id])
 
   useEffect(() => {
     if (bookingStarted) return
@@ -49,10 +49,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   const { currentPrice, totalTickets, bookedTickets, date, name, venue, description } = event
   const remainingTickets: number = totalTickets - bookedTickets
-  const formattedDate =
-    typeof date === 'string'
-      ? new Date(date).toLocaleString()
-      : date.toLocaleString()
+ 
 
   return (
     <div className="relative space-y-6">
@@ -64,8 +61,16 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       <div className="flex justify-center">
         <div className="bg-white p-4 rounded shadow w-full max-w-2xl">
           <h1 className="text-2xl font-semibold">{name}</h1>
-          <p className="text-sm text-gray-600">
-            {formattedDate} • {venue}
+        <p className="text-md text-gray-600">
+          {new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: "Asia/Kolkata",
+          }).format(new Date(date))}{" "}
           </p>
           <p className="mt-2 text-sm">{description}</p>
         </div>

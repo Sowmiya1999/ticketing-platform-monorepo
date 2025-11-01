@@ -7,7 +7,6 @@ dotenv.config();
 
 const client = postgres(process.env.DATABASE_URL!, { max: 1 });
 
-console.log(process.env.DATABASE_URL);
-console.log(process.env.DATABASE_URL);
+console.log("Database connected successfully");
 
 export const db = drizzle(client, {schema});

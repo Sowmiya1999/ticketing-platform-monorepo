@@ -38,8 +38,12 @@ npm run dev
 
 Environment Variables Documentation
 
-NEXT_PUBLIC_API_BASE_URL=      # Base URL for backend API (e.g., http://localhost:3001)
-NEXT_PUBLIC_ADMIN_API_KEY=     # Admin API key for admin-level operations
-NEXT_PUBLIC_BOOKING_TIMER=     # Timer duration (in seconds) for booking confirmation
-NEXT_PUBLIC_MIN_CEILING_WEIGHT # Provided ceiling price should be greater than the base * provided_factor
-NEXT_PUBLIC_MIN_FLOOR_WEIGHT # Provided floor price should be less than the base * provided_factor
+NEXT_PUBLIC_API_BASE_URL     # Base URL for backend API (e.g., http://localhost:3001)
+NEXT_PUBLIC_ADMIN_API_KEY    # Admin API key for admin-level operations
+NEXT_PUBLIC_BOOKING_TIMER    # Timer duration (in seconds) for booking confirmation
+
+NEXT_PUBLIC_MIN_FLOOR_WEIGHT # Defines the minimum allowed multiplier for the Floor Price relative to the Base Price.
+NEXT_PUBLIC_MAX_FLOOR_WEIGHT # Defines the maximum allowed multiplier for the Floor Price relative to the Base Price.
+
+NEXT_PUBLIC_MIN_CEILING_WEIGHT # Defines the minimum allowed multiplier for the Ceiling Price relative to the Base Price.
+NEXT_PUBLIC_MAX_CEILING_WEIGHT # Defines the maximum allowed multiplier for the Ceiling Price relative to the Base Price.

@@ -7,21 +7,23 @@ import {
   CREATE_NEW_BOOKING_FAILED_MESSAGE,
   CREATE_NEW_BOOKING_SUCCESS_MESSAGE,
 } from "../lib/common/constants";
+import { BookingWithEvent } from "../repositories/types/bookingWithEvent.type";
 
 @Injectable()
 export class BookingsService {
-  private readonly logger = new Logger(BookingsService.name);
 
-  constructor(private readonly bookingRepository: BookingsRepository) {}
+  constructor(
+    private readonly bookingRepository: BookingsRepository,
+    private readonly logger: Logger
+  ) {}
   //method to get all the booking for an event
   async getBookingByEventId(eventId: number): Promise<Booking[]> {
     try {
-      console.log(
-        `BookingsService.getBookingByEventId called with eventId: ${eventId}`
-      );
+      this.logger.log(`BookingsService.getBookingByEventId called with eventId: ${eventId}`);
+      
       return this.bookingRepository.getBookingByEventId(eventId);
     } catch (error) {
-      console.error(
+      this.logger.error(
         `BookingsService.getBookingByEventId produced error: ${error}`
       );
       return [];
@@ -30,12 +32,10 @@ export class BookingsService {
 
   async getBookingById(bookingId: number): Promise<Booking[]> {
     try {
-      console.log(
-        `BookingsService.getBookingById called with bookingId: ${bookingId}`
-      );
+      this.logger.log(`BookingsService.getBookingById called with bookingId: ${bookingId}`);
       return this.bookingRepository.getBookingById(bookingId);
     } catch (error) {
-      console.error(`BookingsService.getBookingById produced error: ${error}`);
+      this.logger.error(`BookingsService.getBookingById produced error: ${error}`);
       return [];
     }
   }
@@ -63,7 +63,15 @@ export class BookingsService {
     }
   }
 
-  async getBookingsByEmail(email: string): Promise<any[]> {
-    return await this.bookingRepository.findBookingByEmail(email);
+  async getBookingsByEmail(email: string): Promise<BookingWithEvent[]> {
+    try {
+      this.logger.log(`BookingsService.getBookingsByEmail called with email: ${email}`);
+      return await this.bookingRepository.findBookingByEmail(email);
+    } catch (error) {
+      this.logger.error(
+        `BookingsService.getBookingsByEmail produced error: ${error}`
+      );
+      return [];
   }
+}
 }

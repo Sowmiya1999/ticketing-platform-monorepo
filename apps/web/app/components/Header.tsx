@@ -14,7 +14,6 @@ export default function Header() {
 
         <div className="max-w-fit relative">
           <nav className="space-x-6 text-md font-medium max-w-fit flex items-center">
-            {/* Dropdown Menu for Events */}
             <div className="relative">
               <button
                 onClick={() => setShowDropdown((prev) => !prev)}

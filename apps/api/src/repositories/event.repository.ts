@@ -11,6 +11,7 @@ export class EventsRepository {
   constructor() {}
 
   async findAllEvent(): Promise<Event[]> {
+    
     return await db
       .select()
       .from(events)
@@ -53,25 +54,28 @@ export class EventsRepository {
       pricingRules,
       isDefaultPricingRulesEnabled
     } = eventData;
-    await db
+       const [createdEvent] = await db
       .insert(events)
       .values({
         name,
         venue,
-        date: new Date(date).toISOString().split("T")[0]|| "",
+        date: new Date(date).toISOString() || '',
         description,
-        totalTickets:totalTickets,
-        basePrice:basePrice,
+        totalTickets,
+        basePrice,
         currentPrice: basePrice,
-        ceilingPrice: ceilingPrice,
-        floorPrice:floorPrice,
+        ceilingPrice,
+        floorPrice,
         pricingRules: pricingRules ?? {},
-        isDefaultPricingRulesEnabled
+        isDefaultPricingRulesEnabled,
       })
       .returning();
 
-    return {} as Event;
+    if (!createdEvent) {
+      throw new Error('Failed to create event');
+    }
 
+    return createdEvent as Event;  
   }
 
 }

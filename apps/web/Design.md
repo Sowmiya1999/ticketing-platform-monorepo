@@ -40,12 +40,12 @@ app/
 
 ## Core Features
 
-### 🏠 Home & Navigation
+### Home & Navigation
 The home page (`/`) includes a navigation bar with two main menus:
 - **Events** → Dropdown with options to *Add Event* (admin) or *View Events*
 - **My Bookings** → Lets users view all bookings by email
 
-### 🎟️ View Events (`/events`)
+### View Events (`/events`)
 Displays a list of upcoming events with:
 - Event name, venue, date  
 - Current dynamic price  
@@ -54,7 +54,7 @@ Displays a list of upcoming events with:
 
 Prices and availability automatically refresh **every 30 seconds** to reflect backend updates.
 
-### 📄 Event Details (`/events/[id]`)
+### Event Details (`/events/[id]`)
 Shows event description and allows users to:
 1. Choose ticket quantity  
 2. Enter email address  
@@ -69,7 +69,7 @@ A **2-minute timer** starts when this page is opened.
 If the user doesn’t confirm the booking within the timer, they are redirected back to the `/events` page — preventing outdated price bookings.  
 If the quantity is changed, the breakdown auto-hides until recalculated.
 
-### ✅ Booking Confirmation (`/bookings/success`)
+###  Booking Confirmation (`/bookings/success`)
 After a booking is confirmed, the user is redirected here.  
 The page shows:
 - Event details  
@@ -78,11 +78,11 @@ The page shows:
 - Price breakdown  
 - A **current price comparison** showing whether the price has increased, decreased, or remained unchanged since purchase.
 
-### 📬 My Bookings (`/my-bookings`)
+### My Bookings (`/my-bookings`)
 Users can enter their email ID to view all their past bookings.  
 Each booking card shows the event details along with a live price comparison.
 
-### ⚙️ Admin: Add Event (`/add-event`)
+###  Admin: Add Event (`/add-event`)
 Protected via an **Admin API key**, this page allows event creation.  
 The form includes:
 - Event name, venue, date & time, and description  
@@ -91,9 +91,38 @@ The form includes:
 - Toggle to include or exclude dynamic pricing factors  
 
 Validation ensures:
-- `ceilingPrice > basePrice > floorPrice`  
-- `ceiling > base * Number(process.env.NEXT_PUBLIC_MIN_CEILING_WEIGHT)`
-  `floor > base * Number(process.env.NEXT_PUBLIC_MIN_FLOOR_WEIGHT)`
+
+- ceilingPrice > basePrice > floorPrice
+
+- Ensures that the base price sits logically between floor and ceiling prices.
+
+`Floor Price Limits`
+
+`floorPrice must satisfy:`
+- minFloorPrice <= floorPrice <= maxFloorPrice
+
+- Where minFloorPrice = NEXT_PUBLIC_MIN_FLOOR_WEIGHT * basePrice
+
+- And maxFloorPrice = NEXT_PUBLIC_MAX_FLOOR_WEIGHT * basePrice
+
+`Ceiling Price Limits`
+
+`ceilingPrice must satisfy:`
+- minCeilingPrice <= ceilingPrice <= maxCeilingPrice
+
+- Where minCeilingPrice = NEXT_PUBLIC_MIN_CEILING_WEIGHT * basePrice
+
+- And maxCeilingPrice = NEXT_PUBLIC_MAX_CEILING_WEIGHT * basePrice
+
+`Required Fields`
+
+- name, venue, date, totalTickets, basePrice, floorPrice, ceilingPrice must not be empty.
+
+`Numeric Validation`
+
+- Prices and totalTickets accept only positive numeric values.
+
+- Decimal allowed for prices; integers required for totalTickets.
 - Event date cannot be set in the past  
 
 ---
@@ -102,7 +131,6 @@ Validation ensures:
 
 All API interactions are handled through `lib/clientApi.ts, lib/api.ts`, with the base URL configured via:
 
-```bash
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
 
 

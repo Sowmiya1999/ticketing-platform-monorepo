@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { Logger, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
 import { EventsRepository } from '../repositories/event.repository';
@@ -8,7 +8,7 @@ import { AdminAuthMiddleware } from '../pricingEngine/common/middleware/auth.mid
 
 @Module({
     controllers: [EventsController],
-    providers: [EventsService, EventsRepository,PricingEngineService,BookingsRepository],
+    providers: [EventsService, EventsRepository,PricingEngineService,BookingsRepository,Logger],
     exports: [EventsService,EventsRepository],
 })
 export class EventsModule implements NestModule {
