@@ -10,7 +10,7 @@ Built with **Next.js 15**, **TypeScript**, and **Tailwind CSS** for speed, scala
 Make sure you have the following installed:
 
 - **Node.js** ≥ 18.0.0  
-- **npm** ≥ 9.0.0 (or **yarn/pnpm** equivalent)  
+- **pnpm**: v8+  
 - Backend service running locally at `http://localhost:3001`
 
 ---
@@ -24,7 +24,7 @@ You can set up and run the project in under 5 commands:
 git clone <github url>
 
 # 2. Navigate to the frontend directory
-cd web
+cd .\apps\web
 
 # 3. Install dependencies
 pnpm install
